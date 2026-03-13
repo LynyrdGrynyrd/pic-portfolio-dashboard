@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 200 15% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 15% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 15% 12%;
+    --primary: 189 72% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 189 15% 95%;
+    --secondary-foreground: 189 72% 34%;
+    --muted: 189 10% 95%;
+    --muted-foreground: 200 10% 45%;
+    --accent: 189 15% 93%;
+    --accent-foreground: 189 72% 28%;
+    --destructive: 18 87% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 189 10% 88%;
+    --input: 189 10% 88%;
+    --ring: 189 72% 34%;
+    --chart-1: 189 72% 36%;
+    --chart-2: 190 100% 45%;
+    --chart-3: 45 78% 55%;
+    --chart-4: 322 29% 46%;
+    --chart-5: 18 87% 56%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 200 15% 7%;
+    --foreground: 189 10% 95%;
+    --card: 200 15% 9%;
+    --card-foreground: 189 10% 95%;
+    --popover: 200 15% 9%;
+    --popover-foreground: 189 10% 95%;
+    --primary: 189 72% 50%;
+    --primary-foreground: 200 15% 7%;
+    --secondary: 200 10% 14%;
+    --secondary-foreground: 189 10% 95%;
+    --muted: 200 10% 14%;
+    --muted-foreground: 189 10% 60%;
+    --accent: 200 10% 16%;
+    --accent-foreground: 189 10% 95%;
+    --destructive: 18 80% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 10% 18%;
+    --input: 200 10% 18%;
+    --ring: 189 72% 50%;
+    --chart-1: 189 72% 55%;
+    --chart-2: 190 100% 55%;
+    --chart-3: 45 78% 60%;
+    --chart-4: 322 35% 60%;
+    --chart-5: 18 87% 60%;
+  }
+
+  html, body, #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 30%;
+    --border: 0 0% 80%;
+  }
+
+  .no-print { display: none !important; }
+
+  .print-view {
+    display: block !important;
+    page-break-before: always;
+    margin-bottom: 2rem;
+  }
+  .print-view:first-of-type {
+    page-break-before: auto;
+  }
+
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid black;
+  }
+
+  .rounded-xl, .rounded-lg, .rounded-md {
+    border-radius: 4px !important;
+  }
+  
+  .border, [class*="border-"] {
+    border-color: #ccc !important;
+  }
+
+  .shadow-sm {
+    box-shadow: none !important;
+  }
+
+  @page { 
+    size: letter landscape; 
+    margin: 0.75in; 
+  }
+}

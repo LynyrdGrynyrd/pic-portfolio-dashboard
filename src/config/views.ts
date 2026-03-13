@@ -1,0 +1,40 @@
+import {
+  LayoutDashboard,
+  DollarSign,
+  Microscope,
+  Lightbulb,
+  Rocket,
+  Building2,
+  Target,
+  Users,
+  Shield,
+  CalendarRange,
+  Network,
+} from 'lucide-react';
+
+export const VIEWS = [
+  { id: 'overview', name: 'Overview', shortName: 'Overview', icon: LayoutDashboard,
+    subtitle: 'Portfolio-wide status, funding allocation, and sector coverage' },
+  { id: 'kpis', name: 'KPIs & Targets', shortName: 'KPIs', icon: Target,
+    subtitle: 'Performance metrics tracking against 2031 federal milestones' },
+  { id: 'funding', name: 'Funding', shortName: 'Funding', icon: DollarSign,
+    subtitle: '$85.25M across three federal and state award programs' },
+  { id: 'tech-hub', name: 'Tech Hub Projects', shortName: 'Tech Hub', icon: Microscope,
+    subtitle: 'EDA-funded advanced polymer commercialization projects' },
+  { id: 'innovation', name: 'Innovation Projects', shortName: 'Innovation', icon: Lightbulb,
+    subtitle: 'Ohio Innovation Hubs portfolio — Rounds 1 and 2' },
+  { id: 'synthe6', name: 'Synthe6 Startups', shortName: 'Synthe6', icon: Rocket,
+    subtitle: 'Polymer startup accelerator cohort and venture pipeline' },
+  { id: 'infrastructure', name: 'Infrastructure', shortName: 'Infra', icon: Building2,
+    subtitle: 'Pilot facility design, construction timeline, and specifications' },
+  { id: 'governance', name: 'Governance', shortName: 'Governance', icon: Users,
+    subtitle: 'Leadership committee, advisory council, and reporting calendar' },
+  { id: 'risk-register', name: 'Risk Register', shortName: 'Risks', icon: Shield,
+    subtitle: 'Portfolio risk assessment, mitigation strategies, and ownership' },
+  { id: 'timeline', name: 'Timeline', shortName: 'Timeline', icon: CalendarRange,
+    subtitle: 'Major milestones from formation through 2031 targets' },
+  { id: 'ecosystem', name: 'Partner Ecosystem', shortName: 'Partners', icon: Network,
+    subtitle: 'Partner engagement health across university, corporate, and government sectors' },
+] as const;
+
+export type ViewId = (typeof VIEWS)[number]['id'];

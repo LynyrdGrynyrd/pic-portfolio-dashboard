@@ -1,0 +1,36 @@
+{
+  "name": "pic-portfolio-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lucide/lab": "^0.1.2",
+    "@radix-ui/react-slot": "^1.2.4",
+    "chart.js": "^4.5.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "lucide-react": "^0.577.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0"
+  }
+}

@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIC Innovation Portfolio Dashboard</title>
+    
+    <!-- Permitted External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            /* Color Scheme */
+            --bg: #0d1117;
+            --surface: #161b22;
+            --elevated: #1e2430;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --federal: #1f6feb;
+            --state: #388bfd;
+            --green: #3fb950;
+            --amber: #d29922;
+            --red: #f85149;
+            --purple: #a371f7;
+            
+            /* Sector Colors */
+            --sector-mobility: #58a6ff;
+            --sector-materials: #a371f7;
+            --sector-energy: #d29922;
+            --sector-healthcare: #f85149;
+            --sector-env: #3fb950;
+            --sector-defense: #1f6feb;
+            --sector-unknown: #8b949e;
+
+            /* Typography */
+            --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Reset & Base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-family);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            background: none;
+            color: inherit;
+        }
+
+        /* Layout */
+        #sidebar {
+            width: 240px;
+            background-color: var(--bg);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        #main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 2rem;
+            max-width: calc(100vw - 240px);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Elements */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            fill: var(--accent);
+        }
+
+        .logo-text h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background-color: var(--elevated);
+            color: #fff;
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Header Bar */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .top-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-print {
+            padding: 0.5rem 1rem;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-print:hover {
+            background-color: var(--elevated);
+            border-color: var(--text-muted);
+        }
+
+        .status-badge-header {
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(210, 153, 34, 0.1);
+            color: var(--amber);
+            border: 1px solid var(--amber);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.15s ease-in forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Generic Components */
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-federal { background-color: rgba(31, 111, 235, 0.15); color: var(--federal); border: 1px solid var(--federal); }
+        .badge-state { background-color: rgba(56, 139, 253, 0.15); color: var(--state); border: 1px solid var(--state); }
+        .badge-green { background-color: rgba(63, 185, 80, 0.15); color: var(--green); border: 1px solid var(--green); }
+        .badge-amber { background-color: rgba(210, 153, 34, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+        .badge-purple { background-color: rgba(163, 113, 247, 0.15); color: var(--purple); border: 1px solid var(--purple); }
+        .badge-accent { background-color: rgba(88, 166, 255, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .badge-muted { background-color: rgba(139, 148, 158, 0.15); color: var(--text-muted); border: 1px solid var(--border); }
+
+        /* KPI Stat Cards */
+        .stat-card .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0.5rem 0;
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-card .stat-title {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .stat-card .stat-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Alerts & Callouts */
+        .alert-box {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .alert-amber { border-left: 4px solid var(--amber); color: var(--amber); }
+        .alert-red { border-left: 4px solid var(--red); color: var(--red); }
+        .alert-blue { border-left: 4px solid var(--accent); color: var(--accent); }
+        
+        /* Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+        th {
+            background-color: var(--elevated);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        th.sortable { cursor: pointer; user-select: none; }
+        th.sortable:hover { color: var(--text); }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: rgba(255,255,255,0.02); }
+        
+        /* Expandable Rows */
+        .row-clickable { cursor: pointer; transition: background 0.15s; }
+        .row-clickable:hover { background-color: var(--elevated); }
+        .row-details {
+            display: none;
+            background-color: #000;
+        }
+        .row-details.open { display: table-row; }
+        .row-details-content {
+            padding: 1rem 1.5rem;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Sector Badges List */
+        .sector-pills { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .sector-pill {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            background: var(--elevated);
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Project & Startup Cards */
+        .project-card {
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .project-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .project-card-title { font-size: 1.125rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
+        .project-card-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
+        .project-card-amount { font-size: 1.5rem; font-weight: 700; color: var(--green); margin: 1rem 0; font-variant-numeric: tabular-nums; }
+        .project-card-desc { font-size: 0.875rem; color: var(--text-muted); flex-grow: 1; }
+        .project-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        
+        /* Filters */
+        .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 0.5rem 1.25rem; border-radius: 999px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-muted); font-size: 0.875rem; font-weight: 500;
+            transition: all 0.15s ease;
+        }
+        .filter-btn:hover { border-color: var(--text); color: var(--text); }
+        .filter-btn.active { background: var(--elevated); border-color: var(--accent); color: #fff; }
+
+        /* Synthe6 Pipeline */
+        .pipeline-indicator { display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+        .pipeline-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); background: transparent; }
+        .pipeline-dot.filled { background: var(--accent); border-color: var(--accent); }
+        .pipeline-line { height: 2px; flex: 1; background: var(--border); max-width: 20px; }
+
+        /* Infrastructure Gantt */
+        .gantt-container { width: 100%; }
+        .gantt-axis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+        .gantt-track { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; background: rgba(255,255,255,0.02); padding: 0.5rem 0; border-radius: 4px; margin-bottom: 0.25rem; position: relative; }
+        .gantt-bar { position: absolute; height: 100%; top: 0; border-radius: 4px; display: flex; align-items: center; padding: 0 0.5rem; font-size: 0.75rem; font-weight: 600; color: #fff; overflow: hidden; white-space: nowrap; }
+
+        /* Progress Bars */
+        .progress-wrapper { width: 100%; background: var(--elevated); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-fill { height: 100%; border-radius: 4px; }
+
+        /* Governance Layout */
+        .org-list { list-style: none; position: relative; padding-left: 1.5rem; margin-top: 1rem; }
+        .org-list::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .org-item { position: relative; margin-bottom: 1.25rem; }
+        .org-item::before { content: ''; position: absolute; left: -1.5rem; top: 0.5rem; width: 1rem; height: 2px; background: var(--border); }
+        .org-name { font-weight: 600; color: #fff; }
+        .org-title { font-size: 0.875rem; color: var(--text-muted); }
+        .org-affiliation { font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; }
+        .calendar-month { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; height: 100px; display: flex; flex-direction: column; justify-content: center; }
+        .calendar-month.has-event { border-color: var(--amber); background: rgba(210, 153, 34, 0.05); }
+        .calendar-month.has-event-red { border-color: var(--red); background: rgba(248, 81, 73, 0.05); }
+        .calendar-month.has-event-green { border-color: var(--green); background: rgba(63, 185, 80, 0.05); }
+        .month-name { font-weight: 600; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .month-event { font-size: 0.75rem; font-weight: 500; }
+
+        /* Utilities */
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            #sidebar { width: 64px; }
+            .logo-text, .nav-item span, .sidebar-footer { display: none; }
+            .nav-item { padding: 0.75rem; text-align: center; }
+            #main-content { margin-left: 64px; max-width: calc(100vw - 64px); }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .calendar-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: auto; position: relative; flex-direction: row; align-items: center; padding: 0.5rem; }
+            .nav-menu { display: flex; overflow-x: auto; padding: 0; margin: 0; }
+            .nav-item { white-space: nowrap; margin: 0 0.25rem; }
+            #main-content { margin-left: 0; max-width: 100vw; padding: 1rem; }
+            .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Print Stylesheet */
+        @media print {
+            @page { size: letter landscape; margin: 0.75in; }
+            body { background: #fff !important; color: #000 !important; display: block; overflow: visible; font-size: 10pt; }
+            * { color: #000 !important; box-shadow: none !important; text-shadow: none !important; transition: none !important; border-radius: 0 !important; }
+            
+            #sidebar, .top-header .header-actions, .filter-bar { display: none !important; }
+            #main-content { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            
+            /* Print Header */
+            body::before {
+                content: "PIC Innovation Portfolio Dashboard — March 2026 — CONFIDENTIAL DRAFT";
+                display: block;
+                font-size: 14pt;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #000;
+            }
+
+            .view-section { display: block !important; opacity: 1 !important; page-break-before: always; margin-bottom: 2rem; }
+            .view-section:first-of-type { page-break-before: avoid; }
+            
+            .card, .table-container { background: #fff !important; border: 1px solid #ccc !important; page-break-inside: avoid; margin-bottom: 1rem; }
+            .stat-card .stat-value { color: #000 !important; }
+            
+            th { background-color: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
+            td { border-bottom: 1px solid #ccc !important; }
+            tr:nth-child(even) { background-color: #f9f9f9 !important; }
+            
+            .badge, .alert-box { border: 1px solid #000 !important; background: transparent !important; color: #000 !important; }
+            
+            /* Chart canvases */
+            canvas { max-width: 100% !important; max-height: 300px !important; }
+            .grid-4, .grid-3, .grid-2 { gap: 1rem; }
+            
+            /* Gantt print adjustment */
+            .gantt-bar { border: 1px solid #000; color: #000 !important; background: #eee !important; }
+            .progress-wrapper { background: #ccc !important; }
+            .progress-fill { background: #333 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <svg class="logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L22 7.77V16.23L12 22L2 16.23V7.77L12 2ZM12 4.31L4 8.93V15.07L12 19.69L20 15.07V8.93L12 4.31Z"/>
+            </svg>
+            <div class="logo-text">
+                <h2>PIC Portfolio</h2>
+                <span>Innovation Dashboard</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-target="overview"><span>Overview</span></li>
+            <li class="nav-item" data-target="funding"><span>Funding</span></li>
+            <li class="nav-item" data-target="tech-hub"><span>Tech Hub Projects</span></li>
+            <li class="nav-item" data-target="innovation"><span>Innovation Projects</span></li>
+            <li class="nav-item" data-target="synthe6"><span>Synthe6 Startups</span></li>
+            <li class="nav-item" data-target="infrastructure"><span>Infrastructure</span></li>
+            <li class="nav-item" data-target="kpis"><span>KPIs & Targets</span></li>
+            <li class="nav-item" data-target="governance"><span>Governance</span></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div>As of March 2026</div>
+            <div style="margin-top: 4px;">v0.1 — Prototype</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <header class="top-header">
+            <h1 id="view-title">Overview</h1>
+            <div class="header-actions">
+                <div class="status-badge-header">Seed Data Mode</div>
+                <button class="btn-print" onclick="window.print()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>
+                    Print Report
+                </button>
+            </div>
+        </header>
+
+        <!-- View 1: Overview -->
+        <section id="overview" class="view-section active">
+            <div class="grid-4">
+                <div class="card stat-card">
+                    <div class="stat-title">Total Portfolio Funding</div>
+                    <div class="stat-value animate-number" data-value="85250000" data-format="currency">$0</div>
+                    <div class="stat-subtitle">Across 3 funding sources</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-title">Active Projects</div>
+                    <div class="stat-value animate-number" data-value="18" data-format="number">0</div>
+                    <div class="stat-subtitle">5 Tech Hub + 13 Innovation</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-title">Synthe6 Startups</div>
+                    <div class="stat-value animate-number" data-value="8" data-format="number">0</div>
+                    <div class="stat-subtitle">3 advanced to additional funding</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-title">Jobs Target 2031</div>
+                    <div class="stat-value animate-number" data-value="2400" data-format="number">0</div>
+                    <div class="stat-subtitle">Ohio Innovation Hubs metric</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Funding Breakdown</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="fundingDonutChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Project Stage Distribution</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="stageBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1rem; font-weight: 600;">Sector Coverage</h3>
+                    <div class="sector-pills" id="overview-sectors">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="card" style="display: flex; align-items: center;">
+                    <div class="alert-box alert-amber" style="width: 100%;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Data Quality Alert</strong>
+                            <span style="font-size: 0.875rem;">6 Round 1 Innovation Projects require partner verification. Data entry needed before next committee report.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: Funding -->
+        <section id="funding" class="view-section">
+            <div class="grid-3" id="funding-cards">
+                <!-- Populated by JS -->
+            </div>
+            
+            <div class="table-container mt-2">
+                <table id="funding-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">Funding Source <span></span></th>
+                            <th class="sortable text-right" data-sort="totalAmount">Award Total <span></span></th>
+                            <th class="sortable text-right" data-sort="matchAmount">Local Match <span></span></th>
+                            <th class="sortable text-right" data-sort="combined">Combined <span></span></th>
+                            <th class="sortable" data-sort="source">Source <span></span></th>
+                            <th class="sortable" data-sort="status">Status <span></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="funding-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card mt-2">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Total Funding Leverage (Award + Match)</h3>
+                <div style="position: relative; height: 350px; width: 100%;">
+                    <canvas id="fundingStackedChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 3: Tech Hub Projects -->
+        <section id="tech-hub" class="view-section">
+            <div class="filter-bar" id="tech-hub-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="mobility">Mobility</button>
+                <button class="filter-btn" data-filter="industrial-materials">Industrial Materials</button>
+                <button class="filter-btn" data-filter="energy">Energy</button>
+            </div>
+
+            <div class="grid-3" id="tech-hub-cards">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="card mt-2">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Tech Hub Funding by Project</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="techHubBarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 4: Innovation Projects -->
+        <section id="innovation" class="view-section">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Round 2 — 7 Active Projects</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project ID</th>
+                            <th>Name</th>
+                            <th>Partner</th>
+                            <th>Sector</th>
+                            <th>Stage Gate</th>
+                            <th class="text-center">Synthe6</th>
+                        </tr>
+                    </thead>
+                    <tbody id="innovation-r2-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin: 2rem 0 1rem 0;">Round 1 — 6 Projects (Verification Required)</h2>
+            <div class="alert-box alert-amber mb-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span style="font-size: 0.875rem;">These 6 projects represent the highest-priority data gap. Partner outreach and record verification required before next board report.</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project ID</th>
+                            <th>Name</th>
+                            <th>Partner</th>
+                            <th>Sector</th>
+                            <th>Stage Gate</th>
+                            <th class="text-center">Synthe6</th>
+                        </tr>
+                    </thead>
+                    <tbody id="innovation-r1-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- View 5: Synthe6 Startups -->
+        <section id="synthe6" class="view-section">
+            <div class="mb-2">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">Synthe6 Accelerator Portfolio</h2>
+                <div style="color: var(--text-muted); font-size: 0.875rem;">8 companies | First cohort | $45K seed each</div>
+            </div>
+
+            <div class="grid-4" id="synthe6-cards">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="card text-center mb-2" style="background: rgba(88, 166, 255, 0.05); border-color: var(--accent);">
+                <div style="font-size: 1.125rem; font-weight: 600; color: #fff;">3 of 8 companies (38%) advanced to additional funding rounds</div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Startup Funding Progression</h3>
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="startupBubbleChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 6: Infrastructure -->
+        <section id="infrastructure" class="view-section">
+            <div class="card mb-2" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; color: #fff;">Innovation Pilot Facility</h2>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        100 Lincoln St, Akron, OH (adjacent to NPIC/UA campus)
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                        <div><strong style="color: var(--text-muted); display: block;">Square Footage</strong> <span style="font-weight: 500;">19,000 sqft</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Process Bays</strong> <span style="font-weight: 500;">4</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Max Reactor Vol</strong> <span style="font-weight: 500;">200L</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Batch Scale</strong> <span style="font-weight: 500;">10-100kg</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">High Bay Height</strong> <span style="font-weight: 500;">40ft</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Construction Start</strong> <span style="font-weight: 500;">Q2 2026</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Operations Start</strong> <span style="font-weight: 500; color: var(--green);">2027</span></div>
+                        <div><strong style="color: var(--text-muted); display: block;">Facility Director</strong> <span style="font-weight: 500;">Chad Jasiunas</span></div>
+                    </div>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px; border-left: 1px solid var(--border); padding-left: 2rem;">
+                    <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Construction Timeline</h3>
+                    <div class="gantt-container">
+                        <div class="gantt-axis">
+                            <div>Q1 '26</div><div>Q2 '26</div><div>Q3 '26</div><div>Q4 '26</div>
+                            <div>Q1 '27</div><div>Q2 '27</div><div>Q3 '27</div><div>Q4 '27</div>
+                        </div>
+                        <div class="gantt-track">
+                            <div class="gantt-bar" style="left: 0%; width: 25%; background: var(--amber);">Design & Prep</div>
+                        </div>
+                        <div class="gantt-track">
+                            <div class="gantt-bar" style="left: 25%; width: 37.5%; background: var(--accent);">Construction</div>
+                        </div>
+                        <div class="gantt-track">
+                            <div class="gantt-bar" style="left: 50%; width: 25%; background: var(--text-muted);">Equipment Install</div>
+                        </div>
+                        <div class="gantt-track">
+                            <div class="gantt-bar" style="left: 75%; width: 25%; background: var(--green);">Operations Launch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Process Bays Setup</h3>
+            <div class="grid-4">
+                <div class="card text-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-bottom: 0.5rem;"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line></svg>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">Bay 1</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">Bioprocess</div>
+                    <span class="badge badge-green">Configured</span>
+                </div>
+                <div class="card text-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-bottom: 0.5rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">Bay 2</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">High-Pressure</div>
+                    <span class="badge badge-green">Configured</span>
+                </div>
+                <div class="card text-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-bottom: 0.5rem;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">Bay 3</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">General</div>
+                    <span class="badge badge-green">Configured</span>
+                </div>
+                <div class="card text-center" style="border: 1px dashed var(--border); background: transparent;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom: 0.5rem;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--text-muted);">Bay 4</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">TBD</div>
+                    <span class="badge badge-amber">To Be Determined</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 7: KPIs & Targets -->
+        <section id="kpis" class="view-section">
+            <div class="flex-between mb-1">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">Performance Targets</h2>
+                <span class="badge badge-amber">Deadline: 2031 (5 years remaining)</span>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th class="text-right">Target</th>
+                            <th class="text-right">Current (Illustrative)</th>
+                            <th>% Complete</th>
+                            <th>Status</th>
+                            <th class="text-center">Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpi-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid-3 mt-2">
+                <div class="alert-box alert-blue" style="align-items: flex-start; flex-direction: column;">
+                    <strong style="margin-bottom: 0.5rem; display: block;">Funding Overperformance</strong>
+                    <span style="font-size: 0.875rem; color: var(--text);">
+                        $85.25M secured vs. $75M target — 14% above goal. Strong foundation for earned-revenue transition.
+                    </span>
+                </div>
+                <div class="alert-box alert-amber" style="align-items: flex-start; flex-direction: column;">
+                    <strong style="margin-bottom: 0.5rem; display: block;">Infrastructure Critical Path</strong>
+                    <span style="font-size: 0.875rem; color: var(--text);">
+                        Pilot facility construction start Q2 2026 unlocks job creation and workforce metrics. Pre-construction = expected zero on employment KPIs.
+                    </span>
+                </div>
+                <div class="alert-box alert-red" style="align-items: flex-start; flex-direction: column;">
+                    <strong style="margin-bottom: 0.5rem; display: block;">Data Quality Gap</strong>
+                    <span style="font-size: 0.875rem; color: var(--text);">
+                        6 Round 1 projects unverified. Economic impact calculations may be understated. Priority: partner verification outreach.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 8: Governance -->
+        <section id="governance" class="view-section">
+            <div class="grid-3">
+                <div class="card">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">Leadership Committee</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Established January 2024</div>
+                    <ul class="org-list" id="gov-leadership">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">Operational Staff</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Execution Team</div>
+                    <ul class="org-list" id="gov-staff">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <div class="card text-center">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">Advisory Council</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Established January 2022</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">32 <span style="font-size: 1rem; font-weight: 500; color: var(--text-muted);">Members</span></div>
+                    <div style="position: relative; height: 180px; width: 100%;">
+                        <canvas id="advisoryDonutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">2026 Reporting Calendar</h3>
+                <div class="calendar-grid">
+                    <div class="calendar-month"><div class="month-name">January</div></div>
+                    <div class="calendar-month"><div class="month-name">February</div></div>
+                    <div class="calendar-month has-event"><div class="month-name">March</div><div class="month-event" style="color: var(--amber);">Q1 Board Report</div></div>
+                    <div class="calendar-month"><div class="month-name">April</div></div>
+                    <div class="calendar-month"><div class="month-name">May</div></div>
+                    <div class="calendar-month has-event"><div class="month-name">June</div><div class="month-event" style="color: var(--amber);">Q2 Board Report</div></div>
+                    <div class="calendar-month has-event-red"><div class="month-name">July</div><div class="month-event" style="color: var(--red);">Annual Fed Reporting</div></div>
+                    <div class="calendar-month"><div class="month-name">August</div></div>
+                    <div class="calendar-month has-event"><div class="month-name">September</div><div class="month-event" style="color: var(--amber);">Q3 Board Report</div></div>
+                    <div class="calendar-month"><div class="month-name">October</div></div>
+                    <div class="calendar-month"><div class="month-name">November</div></div>
+                    <div class="calendar-month has-event-green"><div class="month-name">December</div><div class="month-event" style="color: var(--green);">Annual Report Pub</div></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- EMBEDDED DATA ---
+        const PORTFOLIO_DATA = {
+          "fundingSources":[
+            {"id": "eda-tech-hub", "name": "EDA Tech Hub Phase 2", "totalAmount": 51000000, "matchAmount": 7000000, "awardDate": "2024-07-02", "source": "federal", "status": "active-disbursing"},
+            {"id": "ohio-innovation-hub", "name": "Ohio Innovation Hubs Program", "totalAmount": 31250000, "matchAmount": 10400000, "awardDate": "2024-09-05", "source": "state", "status": "active-disbursing"},
+            {"id": "eda-apex-workforce", "name": "EDA Good Jobs Challenge (APEX)", "totalAmount": 3000000, "matchAmount": 3400000, "awardDate": "2025-01-14", "source": "federal", "status": "active"}
+          ],
+          "techHubProjects":[
+            {"projectId": "TH-001", "projectName": "End-of-Life Tire Recycling", "partnerName": "Full Circle Technologies / Goodyear", "fundingAmount": 5600000, "tier": "Established-company", "status": "active", "stageGate": "execution", "sector": "mobility", "description": "Commercializing tire recycling technology for circular economy"},
+            {"projectId": "TH-002", "projectName": "Sustainable Polymer Composites", "partnerName": "Huntsman International", "fundingAmount": 6700000, "tier": "Established-company", "status": "active", "stageGate": "execution", "sector": "industrial-materials", "description": "Liquid phase mixing development for sustainable composites"},
+            {"projectId": "TH-003", "projectName": "Bio-based Butadiene", "partnerName": "BioVerde", "fundingAmount": 12300000, "tier": "Startup/Synthe6", "status": "active", "stageGate": "execution", "sector": "energy", "description": "Manufacturing sustainable synthetic rubber from methane feedstocks"},
+            {"projectId": "TH-004", "projectName": "Carbon Nanotube Composites", "partnerName": "Goodyear / Bridgestone", "fundingAmount": 10400000, "tier": "Established-company", "status": "active", "stageGate": "execution", "sector": "mobility", "description": "Advanced polymer formulations with carbon nanotube reinforcement"},
+            {"projectId": "TH-005", "projectName": "Safer Tire & Plastic Antidegradants", "partnerName": "Flexsys", "fundingAmount": 11400000, "tier": "Established-company", "status": "active", "stageGate": "execution", "sector": "mobility", "description": "Developing world's first viable alternative to 6PPD antidegradant"}
+          ],
+          "innovationProjects":[
+            {"projectId": "IP-R2-001", "projectName": "Bio-Aerogel Wound Dressing", "partnerName": "Auxilium Health", "tier": "Startup/Synthe6", "status": "active", "stageGate": "development", "round": 2, "sector": "healthcare", "description": "Bio-based aerogel wound dressing platform with infection detection", "synthe6": true},
+            {"projectId": "IP-R2-002", "projectName": "Advanced Plastics Processing", "partnerName": "Case Western Reserve University", "tier": "University-linked", "status": "active", "stageGate": "research", "round": 2, "sector": "industrial-materials", "description": "Advanced plastics processing for lightweight composites and packaging"},
+            {"projectId": "IP-R2-003", "projectName": "Biodegradable Nanolayered Films", "partnerName": "Peak Nano", "tier": "Established-company", "status": "active", "stageGate": "development", "round": 2, "sector": "industrial-materials", "description": "Biodegradable multilayer nanolayered polymer films for packaging"},
+            {"projectId": "IP-R2-004", "projectName": "Plastic-to-Fuel Conversion", "partnerName": "PolyKinetix", "tier": "Startup/Synthe6", "status": "active", "stageGate": "development", "round": 2, "sector": "energy", "description": "Portable system converting mixed plastics and tires into usable fuels", "synthe6": true},
+            {"projectId": "IP-R2-005", "projectName": "Green DCPD Production", "partnerName": "Promerus", "tier": "Established-company", "status": "active", "stageGate": "development", "round": 2, "sector": "industrial-materials", "description": "Scaling green dicyclopentadiene production from renewable biomass"},
+            {"projectId": "IP-R2-006", "projectName": "Recyclable PE Film Additives", "partnerName": "Synthomer", "tier": "Synthomer-linked", "status": "active", "stageGate": "development", "round": 2, "sector": "industrial-materials", "description": "Recyclable polyethylene film additive technology"},
+            {"projectId": "IP-R2-007", "projectName": "CO2-Polymer Production Platform", "partnerName": "University of Akron", "tier": "University-linked", "status": "active", "stageGate": "research", "round": 2, "sector": "energy", "description": "Carbon dioxide and butadiene polymer production platform"},
+            {"projectId": "IP-R1-001", "projectName": "Round 1 Project 1", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"},
+            {"projectId": "IP-R1-002", "projectName": "Round 1 Project 2", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"},
+            {"projectId": "IP-R1-003", "projectName": "Round 1 Project 3", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"},
+            {"projectId": "IP-R1-004", "projectName": "Round 1 Project 4", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"},
+            {"projectId": "IP-R1-005", "projectName": "Round 1 Project 5", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"},
+            {"projectId": "IP-R1-006", "projectName": "Round 1 Project 6", "partnerName": "[NEEDS VERIFICATION]", "tier": "unknown", "status": "active", "stageGate": "unknown", "round": 1, "sector": "unknown"}
+          ],
+          "synthe6Startups":[
+            {"projectId": "S6-001", "projectName": "ACE Innovations", "founderName": "Erick Sharp", "sector": "industrial-materials", "technology": "Asphalt additives from recycled materials", "stage": "accelerator", "fundingReceived": 45000, "additionalInnovationFunding": false},
+            {"projectId": "S6-002", "projectName": "Auxilium Health", "founderName": "Isaiah Kaiser", "sector": "healthcare", "technology": "Advanced wound dressing with infection detection", "stage": "accelerator+innovation-project", "fundingReceived": 45000, "additionalInnovationFunding": true},
+            {"projectId": "S6-003", "projectName": "BioVerde", "founderName": "Simon Upfill-Brown, David Witte, Peter Heifetz", "sector": "energy", "technology": "Sustainable plastic and rubber feedstocks from methane", "stage": "accelerator+tech-hub-project", "fundingReceived": 45000, "additionalInnovationFunding": true, "techHubFunding": 12300000},
+            {"projectId": "S6-004", "projectName": "GelPure", "founderName": "Moni Mahesh Ghosh, Brandon McReynolds, Sadhan Jana", "sector": "environmental", "technology": "PFAS removal filter technology", "stage": "accelerator", "fundingReceived": 45000, "additionalInnovationFunding": false},
+            {"projectId": "S6-005", "projectName": "Plastinuva", "founderName": "Sridhar Viamajala", "sector": "industrial-materials", "technology": "High-quality recycled polypropylene", "stage": "accelerator", "fundingReceived": 45000, "additionalInnovationFunding": false},
+            {"projectId": "S6-006", "projectName": "PolyKinetix", "founderName": "William Ullom", "sector": "energy", "technology": "Portable plastic-to-fuel conversion system", "stage": "accelerator+innovation-project", "fundingReceived": 45000, "additionalInnovationFunding": true},
+            {"projectId": "S6-007", "projectName": "Seauciel", "founderName": "Paul Boulier", "sector": "industrial-materials", "technology": "Water-based mixed plastic recycling", "stage": "accelerator", "fundingReceived": 45000, "additionalInnovationFunding": false},
+            {"projectId": "S6-008", "projectName": "TKM Ballistics", "founderName": "Thomas Milo, Angelina Milo", "sector": "defense", "technology": "Advanced polymer ballistic shields", "stage": "accelerator", "fundingReceived": 45000, "additionalInnovationFunding": false}
+          ],
+          "infrastructure":[
+            {"projectId": "INF-001", "projectName": "Innovation Pilot Facility", "location": "100 Lincoln St, Akron, OH (adjacent to NPIC/UA campus)", "fundingAmount": 25000000, "status": "pre-construction", "constructionStart": "Q2 2026", "operationsStart": "2027", "specs": {"squareFootage": 19000, "processBays": 4, "bayTypes":["Bioprocess", "High-Pressure", "General", "TBD"], "maxReactorVolume": "200L", "batchScale": "10-100kg", "highBayHeight": "40ft"}, "manager": "Chad Jasiunas (Director, Polymer Innovation)"}
+          ],
+          "performanceTargets": {
+            "deadline": "2031",
+            "metrics": {
+              "jobsCreated": 2400, "jobsCreatedTechHub": 4000, "workersTrainedSTEM": 500,
+              "researchFundingAttracted": 75000000, "economicImpactAdded": 43000000,
+              "totalEconomicImpactTechHub": 5000000000, "privateInvestmentTarget": 1000000000,
+              "workforcePlacements": 320, "workforceEnrollments": 500
+            }
+          },
+          "governanceStructure": {
+            "leadershipCommittee": {
+              "established": "2024-01",
+              "coChairs":[
+                {"name": "Steve Millard", "title": "President & CEO", "org": "Greater Akron Chamber"},
+                {"name": "Erin Spring", "title": "Sr Director, Global Material Science", "org": "Goodyear"},
+                {"name": "Mark Smale", "title": "Executive Director, Advanced Polymer Science", "org": "Bridgestone"}
+              ],
+              "viceChair": {"name": "Raymond Somich", "title": "Global Director, Government & External Affairs", "org": "Synthomer"}
+            },
+            "advisoryCouncil": {"established": "2022-01-10", "memberCount": 32},
+            "operationalStaff":[
+              {"name": "Hans Dorfi", "title": "Executive Director & CIO"},
+              {"name": "Sarah Deitrick", "title": "Director of Operations"},
+              {"name": "Chad Jasiunas", "title": "Director, Polymer Innovation"},
+              {"name": "Marshall Moore", "title": "Senior Industry Advisor"}
+            ]
+          }
+        };
+
+        // --- UTILS ---
+        const formatCurrency = (val, maxDigits = 2) => {
+            if (val >= 1e6) return `$${(val / 1e6).toFixed(maxDigits)}M`;
+            if (val >= 1e3) return `$${(val / 1e3).toFixed(0)}K`;
+            return `$${val}`;
+        };
+        const formatNumber = (val) => new Intl.NumberFormat('en-US').format(val);
+
+        const getSectorColor = (sector) => {
+            const map = {
+                'mobility': 'var(--sector-mobility)',
+                'industrial-materials': 'var(--sector-materials)',
+                'energy': 'var(--sector-energy)',
+                'healthcare': 'var(--sector-healthcare)',
+                'environmental': 'var(--sector-env)',
+                'defense': 'var(--sector-defense)'
+            };
+            return map[sector] || 'var(--sector-unknown)';
+        };
+        
+        const getSectorLabel = (sector) => {
+            if(!sector || sector === 'unknown') return 'Unknown';
+            return sector.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        };
+
+        // --- STATE & INIT ---
+        let currentView = 'overview';
+        let chartsBuilt = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            bindNavigation();
+            initNumbers();
+            
+            // Build content
+            renderOverview();
+            renderFunding();
+            renderTechHub();
+            renderInnovation();
+            renderSynthe6();
+            renderKPIs();
+            renderGovernance();
+
+            // Set global chart defaults for dark theme
+            Chart.defaults.color = '#8b949e';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+            Chart.defaults.plugins.tooltip.backgroundColor = '#1e2430';
+            Chart.defaults.plugins.tooltip.titleColor = '#fff';
+            Chart.defaults.plugins.tooltip.bodyColor = '#e6edf3';
+            Chart.defaults.plugins.tooltip.borderColor = '#30363d';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+            showView('overview');
+        });
+
+        // --- NAVIGATION ---
+        const bindNavigation = () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+                    const target = item.getAttribute('data-target');
+                    showView(target);
+                    document.getElementById('view-title').textContent = item.querySelector('span').textContent;
+                });
+            });
+        };
+
+        const showView = (viewId) => {
+            document.querySelectorAll('.view-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            const view = document.getElementById(viewId);
+            view.classList.add('active');
+            
+            // Build charts lazily to ensure canvas dimensions exist
+            if (!chartsBuilt[viewId]) {
+                buildChartsForView(viewId);
+                chartsBuilt[viewId] = true;
+            }
+        };
+
+        // --- ANIMATIONS ---
+        const initNumbers = () => {
+            document.querySelectorAll('.animate-number').forEach(el => {
+                const target = parseInt(el.getAttribute('data-value'));
+                const format = el.getAttribute('data-format');
+                const duration = 800;
+                let startTimestamp = null;
+
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    // ease out quad
+                    const easeProgress = progress * (2 - progress);
+                    const current = Math.floor(easeProgress * target);
+                    
+                    if (format === 'currency') el.textContent = formatCurrency(current, 2);
+                    else el.textContent = formatNumber(current);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        if (format === 'currency') el.textContent = formatCurrency(target, 2);
+                        else el.textContent = formatNumber(target);
+                    }
+                };
+                requestAnimationFrame(step);
+            });
+        };
+
+        // --- RENDERERS ---
+
+        const renderOverview = () => {
+            const sectorCounts = { 'mobility': 3, 'industrial-materials': 6, 'energy': 3, 'healthcare': 1, 'environmental': 1, 'defense': 1, 'unknown': 6 };
+            const container = document.getElementById('overview-sectors');
+            Object.entries(sectorCounts).forEach(([sector, count]) => {
+                const color = getSectorColor(sector);
+                const label = getSectorLabel(sector);
+                container.innerHTML += `
+                    <div class="sector-pill">
+                        <div class="dot" style="background-color: ${color}"></div>
+                        ${label} (${count})
+                    </div>
+                `;
+            });
+        };
+
+        const renderFunding = () => {
+            // Cards
+            const cardsContainer = document.getElementById('funding-cards');
+            PORTFOLIO_DATA.fundingSources.forEach(src => {
+                const badgeClass = src.source === 'federal' ? 'badge-federal' : 'badge-state';
+                const statusBadgeClass = src.status === 'active-disbursing' ? 'badge-green' : 'badge-accent';
+                const statusLabel = src.status === 'active-disbursing' ? 'Active — Disbursing' : 'Active';
+                const pct = src.status === 'active-disbursing' ? 35 : 10;
+                
+                cardsContainer.innerHTML += `
+                    <div class="card project-card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <h3 style="font-size: 1.125rem; font-weight: 600;">${src.name}</h3>
+                            <span class="badge ${badgeClass}" style="text-transform: capitalize;">${src.source}</span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">Awarded: ${src.awardDate}</div>
+                        
+                        <div class="project-card-amount">${formatCurrency(src.totalAmount)}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">Match: ${formatCurrency(src.matchAmount)}</div>
+                        
+                        <div style="margin-top: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span class="badge ${statusBadgeClass}">${statusLabel}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">Est. Disbursed (illustrative)</span>
+                            </div>
+                            <div class="progress-wrapper">
+                                <div class="progress-fill" style="width: ${pct}%; background: ${src.status === 'active-disbursing' ? 'var(--green)' : 'var(--accent)'};"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Table
+            renderFundingTable(PORTFOLIO_DATA.fundingSources);
+
+            // Sorting logic
+            let currentSort = null;
+            let sortDesc = false;
+            document.querySelectorAll('#funding-table th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortKey = th.getAttribute('data-sort');
+                    if (currentSort === sortKey) {
+                        sortDesc = !sortDesc;
+                    } else {
+                        currentSort = sortKey;
+                        sortDesc = false;
+                    }
+                    
+                    document.querySelectorAll('#funding-table th span').forEach(span => span.textContent = '');
+                    th.querySelector('span').textContent = sortDesc ? ' ↓' : ' ↑';
+
+                    const sorted =[...PORTFOLIO_DATA.fundingSources].sort((a, b) => {
+                        let valA = a[sortKey];
+                        let valB = b[sortKey];
+                        if (sortKey === 'combined') {
+                            valA = a.totalAmount + a.matchAmount;
+                            valB = b.totalAmount + b.matchAmount;
+                        }
+                        if (valA < valB) return sortDesc ? 1 : -1;
+                        if (valA > valB) return sortDesc ? -1 : 1;
+                        return 0;
+                    });
+                    renderFundingTable(sorted);
+                });
+            });
+        };
+
+        const renderFundingTable = (data) => {
+            const tbody = document.getElementById('funding-tbody');
+            tbody.innerHTML = '';
+            data.forEach(src => {
+                const combined = src.totalAmount + src.matchAmount;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 500; color: #fff;">${src.name}</td>
+                        <td class="text-right">${formatCurrency(src.totalAmount)}</td>
+                        <td class="text-right">${formatCurrency(src.matchAmount)}</td>
+                        <td class="text-right" style="font-weight: 600;">${formatCurrency(combined)}</td>
+                        <td style="text-transform: capitalize;">${src.source}</td>
+                        <td>
+                            <span class="badge ${src.status === 'active-disbursing' ? 'badge-green' : 'badge-accent'}">
+                                ${src.status.replace('-', ' ')}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        const renderTechHub = () => {
+            const container = document.getElementById('tech-hub-cards');
+            const renderCards = (filter) => {
+                container.innerHTML = '';
+                PORTFOLIO_DATA.techHubProjects.forEach(p => {
+                    if (filter !== 'all' && p.sector !== filter) return;
+                    
+                    const isSynthe6 = p.tier.includes('Synthe6');
+                    const synthe6Badge = isSynthe6 ? `<span class="badge badge-accent" style="margin-left: 0.5rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Synthe6</span>` : '';
+                    
+                    container.innerHTML += `
+                        <div class="card project-card">
+                            <div class="project-card-header">
+                                <span class="badge" style="background: var(--elevated); border: 1px solid var(--border); color: ${getSectorColor(p.sector)}">${getSectorLabel(p.sector)}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">${p.projectId}</span>
+                            </div>
+                            <div class="project-card-title">${p.projectName}</div>
+                            <div class="project-card-subtitle">${p.partnerName}</div>
+                            <div class="project-card-amount">${formatCurrency(p.fundingAmount, 1)}</div>
+                            <div class="project-card-desc">${p.description}</div>
+                            <div class="project-card-footer">
+                                <span class="badge badge-green" style="text-transform: capitalize;">${p.stageGate}</span>
+                                <div><span style="font-size: 0.75rem; color: var(--text-muted);">${p.tier.replace('-company','')}</span>${synthe6Badge}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+            
+            renderCards('all');
+
+            // Filters
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderCards(e.target.getAttribute('data-filter'));
+                });
+            });
+        };
+
+        const renderInnovation = () => {
+            const tbodyR2 = document.getElementById('innovation-r2-tbody');
+            const tbodyR1 = document.getElementById('innovation-r1-tbody');
+            
+            const r2 = PORTFOLIO_DATA.innovationProjects.filter(p => p.round === 2);
+            const r1 = PORTFOLIO_DATA.innovationProjects.filter(p => p.round === 1);
+
+            r2.forEach(p => {
+                const stageColor = p.stageGate === 'research' ? 'badge-purple' : 'badge-accent';
+                const synthe6Icon = p.synthe6 ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>` : `<span style="color: var(--text-muted)">—</span>`;
+                
+                tbodyR2.innerHTML += `
+                    <tr class="row-clickable" onclick="this.nextElementSibling.classList.toggle('open')">
+                        <td style="font-family: monospace; color: var(--text-muted);">${p.projectId}</td>
+                        <td style="font-weight: 500; color: #fff;">${p.projectName}</td>
+                        <td>${p.partnerName}</td>
+                        <td><span class="badge" style="border-color: ${getSectorColor(p.sector)}; color: ${getSectorColor(p.sector)}; background: transparent;">${getSectorLabel(p.sector)}</span></td>
+                        <td><span class="badge ${stageColor}" style="text-transform: capitalize;">${p.stageGate}</span></td>
+                        <td class="text-center">${synthe6Icon}</td>
+                    </tr>
+                    <tr class="row-details">
+                        <td colspan="6" style="padding: 0;">
+                            <div class="row-details-content">
+                                <strong>Description:</strong> ${p.description} <br>
+                                <span style="font-size: 0.75rem; margin-top: 0.5rem; display: block; color: var(--text-muted);">Tier: ${p.tier}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            r1.forEach(p => {
+                tbodyR1.innerHTML += `
+                    <tr>
+                        <td style="font-family: monospace; color: var(--text-muted);">${p.projectId}</td>
+                        <td style="font-weight: 500; color: #fff;">${p.projectName}</td>
+                        <td style="color: var(--amber); font-weight: 500;">[NEEDS VERIFICATION]</td>
+                        <td style="color: var(--text-muted);">—</td>
+                        <td style="color: var(--text-muted);">—</td>
+                        <td class="text-center" style="color: var(--text-muted);">—</td>
+                    </tr>
+                `;
+            });
+        };
+
+        const renderSynthe6 = () => {
+            const container = document.getElementById('synthe6-cards');
+            PORTFOLIO_DATA.synthe6Startups.forEach(s => {
+                let p1 = s.stage.includes('accelerator') ? 'filled' : '';
+                let p2 = s.stage.includes('innovation') || s.additionalInnovationFunding ? 'filled' : '';
+                let p3 = s.stage.includes('tech-hub') || s.techHubFunding ? 'filled' : '';
+
+                let badgesHTML = `<div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <span class="badge badge-muted">$45K Accelerator</span>`;
+                if (p2) badgesHTML += `<span class="badge badge-green">+ Innovation Grant</span>`;
+                if (p3) badgesHTML += `<span class="badge badge-federal">+ Tech Hub ${formatCurrency(s.techHubFunding, 1)}</span>`;
+                badgesHTML += `</div>`;
+
+                container.innerHTML += `
+                    <div class="card project-card">
+                        <div class="project-card-header" style="margin-bottom: 0.5rem;">
+                            <h3 class="project-card-title" style="margin: 0;">${s.projectName}</h3>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">${s.founderName}</div>
+                        <div style="margin-bottom: 1rem;">
+                            <span class="badge" style="border-color: ${getSectorColor(s.sector)}; color: ${getSectorColor(s.sector)}; background: transparent; padding-left: 0; border: none;">
+                                <div class="dot" style="background-color: ${getSectorColor(s.sector)}; margin-right: 6px;"></div>
+                                ${getSectorLabel(s.sector)}
+                            </span>
+                        </div>
+                        <div class="project-card-desc" style="flex-grow: 0; margin-bottom: 1.5rem;">${s.technology}</div>
+                        
+                        <div style="margin-top: auto;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Pipeline Progress</div>
+                            <div class="pipeline-indicator">
+                                <div class="pipeline-dot ${p1}"></div>
+                                <div class="pipeline-line"></div>
+                                <div class="pipeline-dot ${p2}"></div>
+                                <div class="pipeline-line"></div>
+                                <div class="pipeline-dot ${p3}"></div>
+                            </div>
+                            ${badgesHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        const renderKPIs = () => {
+            const tbody = document.getElementById('kpi-tbody');
+            const data =[
+                { metric: "Jobs Created (Ohio Hubs)", target: 2400, current: 0, status: "Not Started", trend: "—" },
+                { metric: "Jobs Created (Tech Hub)", target: 4000, current: 0, status: "Not Started", trend: "—" },
+                { metric: "STEM Workers Trained", target: 500, current: 47, status: "On Track", trend: "↑" },
+                { metric: "Research Funding Attracted", target: 75000000, current: 85250000, status: "Exceeded", trend: "↑↑", format: "currency" },
+                { metric: "Economic Impact Added", target: 43000000, current: 12000000, status: "In Progress", trend: "↑", format: "currency" },
+                { metric: "Private Investment", target: 1000000000, current: 180000000, status: "In Progress", trend: "→", format: "currency" },
+                { metric: "Workforce Placements", target: 320, current: 0, status: "Not Started", trend: "—" },
+                { metric: "Workforce Enrollments", target: 500, current: 85, status: "On Track", trend: "↑" }
+            ];
+
+            data.forEach(row => {
+                let pct = Math.round((row.current / row.target) * 100);
+                let visualPct = Math.min(pct, 105); // cap bar width slightly above 100
+                
+                let statusBadge = '';
+                let barColor = 'var(--text-muted)';
+                if (row.status === 'Exceeded') {
+                    statusBadge = `<span class="badge badge-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Exceeded</span>`;
+                    barColor = 'var(--accent)';
+                } else if (row.status === 'On Track') {
+                    statusBadge = `<span class="badge badge-green">On Track</span>`;
+                    barColor = 'var(--green)';
+                } else if (row.status === 'In Progress') {
+                    statusBadge = `<span class="badge badge-amber">In Progress</span>`;
+                    barColor = 'var(--amber)';
+                } else {
+                    statusBadge = `<span class="badge badge-muted">Not Started</span>`;
+                }
+
+                const tgtStr = row.format === 'currency' ? formatCurrency(row.target, 0) : formatNumber(row.target);
+                const curStr = row.format === 'currency' ? formatCurrency(row.current, 2) : formatNumber(row.current);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 500; color: #fff;">${row.metric}</td>
+                        <td class="text-right">${tgtStr}</td>
+                        <td class="text-right">${curStr}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 40px; text-align: right; font-weight: 600; font-size: 0.75rem;">${pct}%</div>
+                                <div class="progress-wrapper" style="margin: 0; flex: 1; max-width: 100px;">
+                                    <div class="progress-fill" style="width: ${visualPct}%; background: ${barColor};"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td class="text-center" style="color: var(--text-muted); font-weight: 600;">${row.trend}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        const renderGovernance = () => {
+            const gov = PORTFOLIO_DATA.governanceStructure;
+            const lul = document.getElementById('gov-leadership');
+            
+            gov.leadershipCommittee.coChairs.forEach(c => {
+                lul.innerHTML += `
+                    <li class="org-item">
+                        <div class="org-name">${c.name} <span class="badge badge-accent" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; margin-left: 4px;">Co-Chair</span></div>
+                        <div class="org-title">${c.title}</div>
+                        <div class="org-affiliation">${c.org}</div>
+                    </li>
+                `;
+            });
+            const vc = gov.leadershipCommittee.viceChair;
+            lul.innerHTML += `
+                <li class="org-item">
+                    <div class="org-name">${vc.name} <span class="badge badge-muted" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; margin-left: 4px;">Vice Chair</span></div>
+                    <div class="org-title">${vc.title}</div>
+                    <div class="org-affiliation">${vc.org}</div>
+                </li>
+            `;
+
+            const sul = document.getElementById('gov-staff');
+            gov.operationalStaff.forEach(s => {
+                sul.innerHTML += `
+                    <li class="org-item">
+                        <div class="org-name">${s.name}</div>
+                        <div class="org-title" style="color: var(--accent); font-weight: 500;">${s.title}</div>
+                    </li>
+                `;
+            });
+        };
+
+        // --- CHART BUILDERS ---
+        const buildChartsForView = (viewId) => {
+            if (viewId === 'overview') {
+                new Chart(document.getElementById('fundingDonutChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['EDA Tech Hub', 'Ohio Innovation Hubs', 'APEX'],
+                        datasets:[{
+                            data:[51000000, 31250000, 3000000],
+                            backgroundColor:['#1f6feb', '#388bfd', '#d29922'],
+                            borderWidth: 0,
+                            cutout: '70%'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#8b949e', usePointStyle: true, boxWidth: 8 } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.raw)}` } }
+                        }
+                    },
+                    plugins:[{
+                        id: 'centerText',
+                        beforeDraw: function(chart) {
+                            let width = chart.width, height = chart.height, ctx = chart.ctx;
+                            ctx.restore();
+                            ctx.font = "600 1.25rem Inter";
+                            ctx.fillStyle = "#fff";
+                            ctx.textBaseline = "middle";
+                            let text = "$85.25M", textX = Math.round((width - ctx.measureText(text).width) / 2), textY = (height / 2) - 10;
+                            ctx.fillText(text, textX, textY);
+                            
+                            ctx.font = "500 0.75rem Inter";
+                            ctx.fillStyle = "#8b949e";
+                            let text2 = "Total", text2X = Math.round((width - ctx.measureText(text2).width) / 2), text2Y = (height / 2) + 10;
+                            ctx.fillText(text2, text2X, text2Y);
+                            ctx.save();
+                        }
+                    }]
+                });
+
+                new Chart(document.getElementById('stageBarChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Research', 'Development', 'Execution', 'Unknown'],
+                        datasets: [{
+                            data: [2, 5, 5, 6],
+                            backgroundColor:['#a371f7', '#58a6ff', '#3fb950', '#8b949e'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} Projects` } },
+                            datalabels: { display: true, color: '#fff', anchor: 'end', align: 'left', formatter: Math.round }
+                        },
+                        scales: {
+                            x: { display: false, grid: { display: false } },
+                            y: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            if (viewId === 'funding') {
+                new Chart(document.getElementById('fundingStackedChart'), {
+                    type: 'bar',
+                    data: {
+                        labels:['EDA Tech Hub', 'Ohio Innovation Hubs', 'APEX'],
+                        datasets: [
+                            { label: 'Award Total', data:[51000000, 31250000, 3000000], backgroundColor: '#1f6feb', borderRadius: {topLeft: 4, bottomLeft: 4} },
+                            { label: 'Local Match', data:[7000000, 10400000, 3400000], backgroundColor: '#388bfd', borderRadius: {topRight: 4, bottomRight: 4} }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#8b949e', usePointStyle: true } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` } }
+                        },
+                        scales: {
+                            x: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: val => formatCurrency(val) } },
+                            y: { stacked: true, grid: { display: false }, border: { display: false } }
+                        },
+                        indexAxis: 'y'
+                    }
+                });
+            }
+
+            if (viewId === 'tech-hub') {
+                const colors = PORTFOLIO_DATA.techHubProjects.map(p => getSectorColor(p.sector));
+                new Chart(document.getElementById('techHubBarChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: PORTFOLIO_DATA.techHubProjects.map(p => p.projectId),
+                        datasets:[{
+                            data: PORTFOLIO_DATA.techHubProjects.map(p => p.fundingAmount),
+                            backgroundColor: colors,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { 
+                                title: (ctx) => PORTFOLIO_DATA.techHubProjects[ctx[0].dataIndex].projectName,
+                                label: (ctx) => ` Funding: ${formatCurrency(ctx.raw, 1)}` 
+                            }}
+                        },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: val => formatCurrency(val, 0) } },
+                            y: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            if (viewId === 'synthe6') {
+                // Prepare bubble data
+                // X = engagement (1=accel, 2=innov, 3=techhub)
+                // Y = total funding (log or actual scaled)
+                // R = proportional to funding
+                const bubbleData = PORTFOLIO_DATA.synthe6Startups.map(s => {
+                    let x = 1, y = s.fundingReceived, r = 8;
+                    if (s.techHubFunding) {
+                        x = 3; y += s.techHubFunding; r = 24;
+                    } else if (s.additionalInnovationFunding) {
+                        x = 2; y += 150000; r = 14; // estimated innov funding for visualization
+                    }
+                    return { x, y, r, label: s.projectName, sector: s.sector };
+                });
+
+                new Chart(document.getElementById('startupBubbleChart'), {
+                    type: 'bubble',
+                    data: {
+                        datasets:[{
+                            label: 'Startups',
+                            data: bubbleData,
+                            backgroundColor: bubbleData.map(d => {
+                                let c = getSectorColor(d.sector);
+                                return c.replace(')', ', 0.6)').replace('var(', '').replace(')', ''); 
+                                // Chart.js handles CSS vars directly usually, but transparency needs hex or rgba. 
+                                // Since we use hex vars, let's just use the direct color.
+                            }),
+                            borderColor: bubbleData.map(d => getSectorColor(d.sector)),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { 
+                                label: (ctx) => ` ${ctx.raw.label}: ${formatCurrency(ctx.raw.y)}` 
+                            }}
+                        },
+                        scales: {
+                            x: { 
+                                min: 0.5, max: 3.5, 
+                                ticks: { callback: val => ['', 'Accelerator Only', '+ Innovation', '+ Tech Hub'][val] || '' },
+                                grid: { color: 'rgba(255,255,255,0.05)' }
+                            },
+                            y: { 
+                                type: 'logarithmic',
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { callback: val => formatCurrency(val, 0) }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (viewId === 'governance') {
+                new Chart(document.getElementById('advisoryDonutChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Industry', 'Academic', 'Government'],
+                        datasets: [{
+                            data:[18, 8, 6],
+                            backgroundColor:['#58a6ff', '#a371f7', '#d29922'],
+                            borderWidth: 0,
+                            cutout: '65%'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#8b949e', usePointStyle: true, boxWidth: 6, font: {size: 10} } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw} Members` } }
+                        }
+                    }
+                });
+            }
+        };
+
+    </script>
+</body>
+</html>
