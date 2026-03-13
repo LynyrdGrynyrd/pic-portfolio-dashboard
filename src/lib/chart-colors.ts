@@ -1,3 +1,17 @@
+const SECTOR_COLORS: Record<string, string> = {
+  'mobility':             '#1a8a9e',
+  'industrial-materials': '#00bfe7',
+  'energy':               '#e5b731',
+  'healthcare':           '#995480',
+  'environmental':        '#5b7fa6',
+  'defense':              '#6b7fa8',
+  'unknown':              '#9ca3af',
+};
+
+export function getSectorColor(sector: string): string {
+  return SECTOR_COLORS[sector.toLowerCase()] ?? SECTOR_COLORS['unknown'];
+}
+
 const FALLBACKS = {
   foreground: '#1a2a2e',
   mutedForeground: '#6b7b80',

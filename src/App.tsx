@@ -71,7 +71,10 @@ function App() {
 
         <div className="min-w-0 flex-1 p-4 md:p-6 animate-in fade-in duration-300">
           <ErrorBoundary key={currentView} fallbackTitle={`${activeViewObj?.name ?? 'View'} failed to render`}>
-            <ViewComponent />
+            {currentView === 'overview'
+              ? <OverviewView onNavigate={setCurrentView} />
+              : <ViewComponent />
+            }
           </ErrorBoundary>
         </div>
       </main>

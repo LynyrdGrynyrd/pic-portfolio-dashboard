@@ -14,8 +14,8 @@ export function HealthStrip({ currentView, onNavigate }: HealthStripProps) {
   const facilityStatus = PORTFOLIO_DATA.infrastructure[0]?.status === 'pre-construction' ? 'Design phase' : 'Active';
 
   const indicators: { label: string; value: string; status: 'green' | 'amber' | 'red'; view: ViewId }[] = [
-    { label: 'Funding', value: `$${(totalFunding / 1e6).toFixed(1)}M`, status: 'green', view: 'funding' },
-    { label: 'Projects', value: `${activeProjects} active`, status: 'green', view: 'overview' },
+    { label: 'Funding', value: 'On Track', status: 'green', view: 'funding' },
+    { label: 'Portfolio', value: `${activeProjects} active`, status: 'green', view: 'overview' },
     { label: 'Jobs', value: `0/${jobsTarget.toLocaleString()}`, status: 'amber', view: 'kpis' },
     { label: 'Facility', value: facilityStatus, status: 'green', view: 'infrastructure' },
     { label: 'Data', value: `${dataGaps} gaps`, status: dataGaps > 0 ? 'red' : 'green', view: 'innovation' },
@@ -46,6 +46,7 @@ export function HealthStrip({ currentView, onNavigate }: HealthStripProps) {
           key={ind.label}
           type="button"
           onClick={() => onNavigate(ind.view)}
+          title={`${ind.label}: ${ind.value} — click to view details`}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs whitespace-nowrap transition-colors hover:bg-accent ${currentView === ind.view ? 'bg-accent font-medium' : ''}`}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${statusDot[ind.status]}`} />

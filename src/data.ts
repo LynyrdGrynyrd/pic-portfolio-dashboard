@@ -48,6 +48,29 @@ export const PORTFOLIO_DATA = {
       "workforcePlacements": 320, "workforceEnrollments": 500
     }
   },
+  "quarterlySnapshots": [
+    {
+      "quarter": "Q3 2025",
+      "label": "Pre-Ohio Hub award",
+      "totalFunding": 51000000,
+      "activeProjects": 5,
+      "synthe6Startups": 0
+    },
+    {
+      "quarter": "Q4 2025",
+      "label": "Ohio Hub + Innovation Projects funded",
+      "totalFunding": 85250000,
+      "activeProjects": 13,
+      "synthe6Startups": 0
+    },
+    {
+      "quarter": "Q1 2026",
+      "label": "Current — Synthe6 cohort launched",
+      "totalFunding": 85250000,
+      "activeProjects": 18,
+      "synthe6Startups": 8
+    }
+  ],
   "governanceStructure": {
     "leadershipCommittee": {
       "established": "2024-01",

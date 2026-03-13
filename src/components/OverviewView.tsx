@@ -5,8 +5,36 @@ import { PORTFOLIO_DATA } from '../data';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { getChartTheme } from '@/lib/chart-colors';
+import type { ViewId } from '../config/views';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+function ProgressBar({ label, value, max, unit = '' }: { label: string; value: number; max: number; unit?: string }) {
+  const pct = Math.min((value / max) * 100, 100);
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium">{value.toLocaleString()}{unit} / {max.toLocaleString()}{unit}</span>
+      </div>
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.max(pct, 2)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function TrendBadge({ current, previous, label }: { current: number; previous: number; label: string }) {
+  if (previous === 0 && current === 0) return null;
+  const delta = current - previous;
+  if (delta === 0) return <span className="text-xs text-muted-foreground">No change vs Q4 2025</span>;
+  const isUp = delta > 0;
+  return (
+    <span className={`text-xs font-medium ${isUp ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+      {isUp ? '↑' : '↓'} {label}
+    </span>
+  );
+}
 
 function AnimatedNumber({ value, formatter = (v: number) => v.toString() }: { value: number, formatter?: (v: number) => string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -29,7 +57,11 @@ function AnimatedNumber({ value, formatter = (v: number) => v.toString() }: { va
   return <>{formatter(displayValue)}</>;
 }
 
-export function OverviewView() {
+interface OverviewViewProps {
+  onNavigate?: (view: ViewId) => void;
+}
+
+export function OverviewView({ onNavigate }: OverviewViewProps = {}) {
   const formatM = (val: number) => `$${(val / 1000000).toFixed(2)}M`;
   const chartTheme = getChartTheme();
 
@@ -38,6 +70,7 @@ export function OverviewView() {
   const synthe6StartupsCount = PORTFOLIO_DATA.synthe6Startups.length;
   const jobsTarget = PORTFOLIO_DATA.performanceTargets.metrics.jobsCreated;
   const dataQualityGaps = PORTFOLIO_DATA.innovationProjects.filter(p => p.partnerName === '[NEEDS VERIFICATION]').length;
+  const prevQ = PORTFOLIO_DATA.quarterlySnapshots[1]; // Q4 2025 baseline
 
   const donutData = {
     labels: ['EDA Tech Hub Phase 2', 'Ohio Innovation Hubs', 'EDA Good Jobs (APEX)'],
@@ -100,31 +133,54 @@ export function OverviewView() {
             <p className="text-sm text-muted-foreground">Polymer Industry Cluster — Akron, Ohio</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <div>
-              <div className="text-3xl font-bold text-primary" aria-live="polite">
+            <button
+              onClick={() => onNavigate?.('funding')}
+              className="text-left group cursor-pointer rounded-lg p-2 -m-2 hover:bg-muted/50 transition-colors disabled:cursor-default"
+              disabled={!onNavigate}
+            >
+              <div className="text-3xl font-bold text-primary group-hover:text-primary/80 transition-colors" aria-live="polite">
                 $<AnimatedNumber value={totalFunding / 1000000} formatter={(v) => v.toFixed(2)} />M
               </div>
               <div className="text-sm text-muted-foreground">Total Funding</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold" aria-live="polite">
+              <TrendBadge current={totalFunding} previous={prevQ.totalFunding} label="No change vs Q4 2025" />
+              {onNavigate && <div className="text-xs text-primary/60 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">View funding →</div>}
+            </button>
+            <button
+              onClick={() => onNavigate?.('innovation')}
+              className="text-left group cursor-pointer rounded-lg p-2 -m-2 hover:bg-muted/50 transition-colors disabled:cursor-default"
+              disabled={!onNavigate}
+            >
+              <div className="text-3xl font-bold group-hover:text-primary transition-colors" aria-live="polite">
                 <AnimatedNumber value={activeProjectsCount} formatter={(v) => Math.round(v).toString()} />
               </div>
               <div className="text-sm text-muted-foreground">Active Projects</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold" aria-live="polite">
+              <TrendBadge current={activeProjectsCount} previous={prevQ.activeProjects} label={`+${activeProjectsCount - prevQ.activeProjects} since Q4 2025`} />
+              {onNavigate && <div className="text-xs text-primary/60 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">View projects →</div>}
+            </button>
+            <button
+              onClick={() => onNavigate?.('synthe6')}
+              className="text-left group cursor-pointer rounded-lg p-2 -m-2 hover:bg-muted/50 transition-colors disabled:cursor-default"
+              disabled={!onNavigate}
+            >
+              <div className="text-3xl font-bold group-hover:text-primary transition-colors" aria-live="polite">
                 <AnimatedNumber value={synthe6StartupsCount} formatter={(v) => Math.round(v).toString()} />
               </div>
               <div className="text-sm text-muted-foreground">Synthe6 Startups</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold" aria-live="polite">
+              <TrendBadge current={synthe6StartupsCount} previous={prevQ.synthe6Startups} label={`+${synthe6StartupsCount - prevQ.synthe6Startups} new cohort`} />
+              {onNavigate && <div className="text-xs text-primary/60 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">View startups →</div>}
+            </button>
+            <button
+              onClick={() => onNavigate?.('kpis')}
+              className="text-left group cursor-pointer rounded-lg p-2 -m-2 hover:bg-muted/50 transition-colors disabled:cursor-default"
+              disabled={!onNavigate}
+            >
+              <div className="text-3xl font-bold group-hover:text-primary transition-colors" aria-live="polite">
                 <AnimatedNumber value={jobsTarget} formatter={(v) => Math.round(v).toLocaleString()} />
               </div>
               <div className="text-sm text-muted-foreground">Jobs Target 2031</div>
               <div className="text-xs text-muted-foreground">2,400 by 2031 — 5-year commitment</div>
-            </div>
+              {onNavigate && <div className="text-xs text-primary/60 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">View KPIs →</div>}
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -168,8 +224,8 @@ export function OverviewView() {
         </Card>
       </div>
 
-      {/* Bottom row */}
-      <div className="grid grid-cols-1 gap-6">
+      {/* Bottom row — 2 columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Sector Coverage</CardTitle>
@@ -182,6 +238,19 @@ export function OverviewView() {
             <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Environmental (1)</Badge>
             <Badge variant="outline" className="bg-sky-500/10 text-sky-400 border-sky-500/20">Defense (1)</Badge>
             <Badge variant="secondary">Unknown (6)</Badge>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">2031 Federal Targets</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ProgressBar label="Jobs Created" value={0} max={PORTFOLIO_DATA.performanceTargets.metrics.jobsCreated} />
+            <ProgressBar label="Research Funding Attracted" value={0} max={PORTFOLIO_DATA.performanceTargets.metrics.researchFundingAttracted} />
+            <ProgressBar label="Workforce Placements" value={0} max={PORTFOLIO_DATA.performanceTargets.metrics.workforcePlacements} />
+            <ProgressBar label="Workers Trained (STEM)" value={0} max={PORTFOLIO_DATA.performanceTargets.metrics.workersTrainedSTEM} />
+            <p className="text-xs text-muted-foreground pt-1">All targets due 2031 — currently Year 1 of 5</p>
           </CardContent>
         </Card>
       </div>

@@ -4,7 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import { PORTFOLIO_DATA } from '../data';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge'; 
-import { getChartTheme } from '@/lib/chart-colors';
+import { getChartTheme, getSectorColor } from '@/lib/chart-colors';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -28,21 +28,12 @@ export function TechHubView() {
     }
   };
 
-  const getFundingColor = (sector: string) => {
-    switch(sector) {
-      case 'mobility': return chartTheme.chart1;
-      case 'industrial-materials': return chartTheme.chart2;
-      case 'energy': return chartTheme.chart3;
-      default: return chartTheme.mutedForeground;
-    }
-  };
-
   const chartData = {
     labels: PORTFOLIO_DATA.techHubProjects.map(p => p.projectId),
     datasets: [{
       label: 'Funding Amount',
       data: PORTFOLIO_DATA.techHubProjects.map(p => p.fundingAmount / 1000000),
-      backgroundColor: PORTFOLIO_DATA.techHubProjects.map(p => getFundingColor(p.sector)),
+      backgroundColor: PORTFOLIO_DATA.techHubProjects.map(p => getSectorColor(p.sector)),
       borderRadius: 4
     }]
   };

@@ -1,5 +1,6 @@
 import { Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';
+import { generateSummaryReport } from '@/lib/export-report';
 
 interface HeaderProps {
   title: string;
@@ -19,6 +20,9 @@ export function Header({ title, subtitle, onPrint, theme, onToggleTheme }: Heade
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <Button variant="outline" size="icon" className="h-8 w-8" onClick={onToggleTheme} aria-label="Toggle dark mode">
           {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </Button>
+        <Button variant="outline" size="sm" className="whitespace-nowrap hidden sm:flex" onClick={generateSummaryReport} aria-label="Export summary report">
+          Export Summary
         </Button>
         <Button variant="outline" size="sm" className="whitespace-nowrap" onClick={onPrint} aria-label="Print report">
           <span className="sm:hidden">Print</span>
