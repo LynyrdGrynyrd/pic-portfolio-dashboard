@@ -6,7 +6,7 @@ const FALLBACKS = {
   chart2: '#00bfe7',
   chart3: '#e5b731',
   chart4: '#995480',
-  chart5: '#f0672c',
+  chart5: '#5b7fa6',
 };
 
 function resolveHslToken(token: string, fallback: string) {

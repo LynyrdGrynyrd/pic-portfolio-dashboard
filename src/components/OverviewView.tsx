@@ -123,10 +123,22 @@ export function OverviewView() {
                 <AnimatedNumber value={jobsTarget} formatter={(v) => Math.round(v).toLocaleString()} />
               </div>
               <div className="text-sm text-muted-foreground">Jobs Target 2031</div>
+              <div className="text-xs text-muted-foreground">2,400 by 2031 — 5-year commitment</div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Data Quality Alert — full-width banner */}
+      <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-5 py-4">
+        <svg className="mt-0.5 shrink-0 text-amber-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+        <div>
+          <h3 className="text-sm font-semibold text-amber-500">Data Quality Alert</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {dataQualityGaps} Round 1 Innovation Projects require partner verification. Data entry needed before next committee report.
+          </p>
+        </div>
+      </div>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -134,7 +146,7 @@ export function OverviewView() {
           <CardHeader>
             <CardTitle className="text-lg">Funding Breakdown</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 min-h-0 overflow-hidden relative pb-6" role="img" aria-label="Funding breakdown chart showing distribution across EDA Tech Hub, Ohio Innovation Hubs, and EDA Good Jobs programs">
+          <CardContent className="flex-1 min-h-0 overflow-hidden relative pb-6" aria-label="Funding breakdown chart: $85.25M total across EDA Tech Hub Phase 2, Ohio Innovation Hubs, and EDA Good Jobs APEX">
             <Doughnut data={donutData} options={donutOptions} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] text-center">
               <div className="text-2xl font-bold">$85.25M</div>
@@ -147,14 +159,17 @@ export function OverviewView() {
           <CardHeader>
             <CardTitle className="text-lg">Project Stage Distribution</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 min-h-0 overflow-hidden pb-6" role="img" aria-label="Project stage distribution chart showing research, development, execution, and unknown stages">
+          <CardContent className="flex-1 min-h-0 overflow-hidden pb-6" aria-label="Project stage distribution: 18 active projects across Research, Development, Execution, and Unknown stages">
             <Bar data={barData} options={barOptions} />
+            <p className="mt-2 text-xs text-amber-500/80">
+              6 projects pending stage classification — update required before next committee report.
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Bottom row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Sector Coverage</CardTitle>
@@ -167,18 +182,6 @@ export function OverviewView() {
             <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Environmental (1)</Badge>
             <Badge variant="outline" className="bg-sky-500/10 text-sky-400 border-sky-500/20">Defense (1)</Badge>
             <Badge variant="secondary">Unknown (6)</Badge>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-amber-500">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2 text-amber-500">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-              <h3 className="text-lg font-semibold m-0">Data Quality Alert</h3>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              {dataQualityGaps} Round 1 Innovation Projects require partner verification. Data entry needed before next committee report.
-            </p>
           </CardContent>
         </Card>
       </div>

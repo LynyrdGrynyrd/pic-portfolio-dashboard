@@ -27,6 +27,18 @@ export function HealthStrip({ currentView, onNavigate }: HealthStripProps) {
     red: 'bg-red-500',
   };
 
+  const statusIcon: Record<string, string> = {
+    green: '✓',
+    amber: '⚠',
+    red: '✕',
+  };
+
+  const statusIconColor: Record<string, string> = {
+    green: 'text-green-500',
+    amber: 'text-amber-500',
+    red: 'text-red-500',
+  };
+
   return (
     <div className="no-print flex items-center gap-1 px-4 md:px-6 py-1.5 border-b border-border bg-muted/30 overflow-x-auto">
       {indicators.map((ind, i) => (
@@ -37,6 +49,7 @@ export function HealthStrip({ currentView, onNavigate }: HealthStripProps) {
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs whitespace-nowrap transition-colors hover:bg-accent ${currentView === ind.view ? 'bg-accent font-medium' : ''}`}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${statusDot[ind.status]}`} />
+          <span className={`text-xs leading-none ${statusIconColor[ind.status]}`} aria-hidden="true">{statusIcon[ind.status]}</span>
           <span className="text-muted-foreground">{ind.label}:</span>
           <span className="font-medium">{ind.value}</span>
         </button>

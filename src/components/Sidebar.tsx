@@ -47,7 +47,12 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps) {
             >
               <Icon size={20} className="shrink-0" />
               <span className="text-xs font-medium md:hidden">{view.shortName}</span>
-              <span className="hidden md:block">{view.name}</span>
+              <span className="hidden md:block">
+                {view.name}
+                {'navSubtitle' in view && view.navSubtitle && (
+                  <span className="block text-xs text-muted-foreground font-normal">{view.navSubtitle}</span>
+                )}
+              </span>
             </button>
           );
         })}

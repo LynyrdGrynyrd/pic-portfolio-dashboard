@@ -22,7 +22,7 @@ export function Header({ title, subtitle, onPrint, theme, onToggleTheme }: Heade
         </Button>
         <Button variant="outline" size="sm" className="whitespace-nowrap" onClick={onPrint} aria-label="Print report">
           <span className="sm:hidden">Print</span>
-          <span className="hidden sm:inline">Print Report</span>
+          <span className="hidden sm:inline">Print This View</span>
         </Button>
       </div>
     </header>
